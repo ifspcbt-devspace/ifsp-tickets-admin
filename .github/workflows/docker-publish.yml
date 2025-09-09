@@ -1,0 +1,45 @@
+name: Django App - GHCR
+
+on:
+  push:
+    branches:
+      - main
+      - homolog
+
+jobs:
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Clonar o repositório
+      - name: Check out the repository
+        uses: actions/checkout@v3
+
+      # 2. Configurar Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # 3. Logar no GitHub Container Registry
+      - name: Log in to GitHub Container Registry
+        run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      # 4. Definir tag baseada na branch
+      - name: Set branch-specific tag
+        id: tag
+        run: |
+          if [[ "${{ github.ref_name }}" == "main" ]]; then
+            echo "Running on default branch 'main': tag = 'latest'"
+            echo "tag=latest" >> $GITHUB_ENV
+          else
+            echo "Running on branch '${{ github.ref_name }}': tag = '${{ github.ref_name }}'"
+            echo "tag=${{ github.ref_name }}" >> $GITHUB_ENV
+
+      # 5. Build e push da imagem Docker
+      - name: Build and push Docker image
+        run: |
+          docker build --pull -t ghcr.io/${{ github.repository_owner }}/${{ github.repository }}:${{ env.tag }} .
+          docker push ghcr.io/${{ github.repository_owner }}/${{ github.repository }}:${{ env.tag }}
+
+      # 6. Limpar imagens Docker locais
+      - name: Clean up Docker images
+        run: |
+          docker rmi ghcr.io/${{ github.repository_owner }}/${{ github.repository }}:${{ env.tag }} || true
