@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential libpq-dev curl \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /
+WORKDIR /app
 
 # Copia dependências
 COPY requirements.txt .
@@ -29,7 +29,7 @@ COPY . .
 RUN python manage.py collectstatic --noinput
 
 # Ajusta permissões
-RUN chown -R django:django /
+RUN chown -R django:django /app
 
 USER django
 
