@@ -32,6 +32,7 @@ jobs:
           else
             echo "Running on branch '${{ github.ref_name }}': tag = '${{ github.ref_name }}'"
             echo "tag=${{ github.ref_name }}" >> $GITHUB_ENV
+          fi
 
       # 5. Build e push da imagem Docker
       - name: Build and push Docker image
